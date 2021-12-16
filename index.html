@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+    <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <title>SuperHero</title>
+
+    </head>
+    <body>
+        <div class="container">
+            <nav class="navbar navbar-dark bg-dark">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">
+                        <img src="/assets/img/favicon.ico" alt="" width="30" height="24" class="d-inline-block align-text-top">
+                        SuperHero
+                    </a>
+                </div>
+            </nav>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col md-3">
+                    </div>
+                    <div class="col md-6">
+                        <div class="card ">
+                            <img id="statica-img" src="/assets/img/sh1.jpg" class="card-img-top" alt="...">
+                        </div>
+                    </div>
+                    <div class="col md-3">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col md-12">
+                        <h4>Encuentra tu Superhero</h4>
+                        <form id="superhero-form">
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Ingresa el número del Superhero a buscar</label>
+                                <input type="number" class="form-control" id="superhero-id" min="1" max="731" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Buscar</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="row align-items-start">
+                    <div class="col">
+                    </div>
+                    <div class="col">
+                        <p id="Encontrado_titulo"></p>
+                    </div>
+                    <div class="col">
+                        <h5 id="estadistica_titulo"></h5>
+<!--                        <p id="estadistica_titulo" ></p> -->
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col">
+                        <div class="card">
+                            <img id="superhero-img"  src="" class="card-img-top" alt="">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card-body">
+                            <h5 class="card-name"></h5>
+                            <p class="card-speed"></p>
+                            <p class="card-power"></p>
+                            <p class="card_nombre"></p>
+                            <p class="card_conexion"></p>
+                            <p class="card_publicacion"></p>
+                            <p class="card_ocupacion"></p>
+                            <ul id="tipos"></ul>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div id="chartContainer" style="height: 370px; width: 100%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+        <script>
+                // Funcion para generar graficos
+            function Generargrafico(superhero) {
+
+                let new_datapoint = [];
+                new_datapoint.push({
+                    label : "intelligence",
+                    y : superhero.powerstats.intelligence
+                });
+                
+                new_datapoint.push({
+                    label : "strength",
+                    y : superhero.powerstats.strength
+                });
+
+                new_datapoint.push({
+                    label : "speed",
+                    y : superhero.powerstats.speed
+                });
+
+                new_datapoint.push({
+                    label : "power",
+                    y : superhero.powerstats.power
+                });
+
+                new_datapoint.push({
+                    label : "combat",
+                    y : superhero.powerstats.combat
+                });
+
+                var chart = new CanvasJS.Chart("chartContainer", {
+                    theme: "light2", // "light1", "light2", "dark1", "dark2"
+                    exportEnabled: true,
+                    animationEnabled: true,
+//                        title: {
+//                            text: `Estadisticas de Poder para ${superhero.name}`
+//                        },
+                    data: [{
+                        type: "pie",
+                        startAngle: 25,
+                        toolTipContent: "<b>{label}</b>: {y}%",
+                        showInLegend: "true",
+                        legendText: "{label}",
+                        indexLabelFontSize: 16,
+                        indexLabel: "{label} ({y})",
+                        dataPoints: new_datapoint 
+                    }]
+
+                });
+                chart.render();
+            }
+
+
+            $('#superhero-form').on('submit', function(ev) {
+                // primero evitamos que se recargue la página
+                ev.preventDefault();
+
+                // obtengo la id ingresada por el usuario
+                const id = $('#superhero-id').val();
+
+                $.get(`https://superheroapi.com/api.php/10226552460022874/${id}`, function(superhero) {
+
+                    $("#superhero-img").attr('src', superhero.image.url)
+
+                    // Primero cargo el nombre
+                    $('.card_nombre').html(superhero.name);
+                    $('.card_conexion').html(superhero.connections.relatives);
+                    $('.card_publicacion').html(superhero.biography.publisher);
+                    $('.card_ocupacion').html(superhero.work.occupation);
+                    $('.card_primera_aparicion').html(superhero.biography[`first-appearance`]);
+                    $('.card_altura').html(superhero.appearance.height[0] + " - " + superhero.appearance.height[1]); 
+                    $('.card_peso').html(superhero.appearance.weight[0] + " - " + superhero.appearance.weight[1]);
+                    $('.card_alianza').html(superhero.biography.aliases[0] + " - " + superhero.biography.aliases[1]);
+                    $('#estadistica_titulo').html(`Estadisticas de Poder para ${superhero.name}`)
+                    $('#Encontrado_titulo').html('Super heroe encontrado')
+
+                    console.log(superhero);
+
+                    Generargrafico(superhero)
+                });
+            });
+
+        </script>
+    </body>
+</html>
